@@ -12,6 +12,9 @@ load_dotenv()
 api_key = os.getenv("GROQ_API_KEY")
 
 app = FastAPI(title="Servidor de Resúmenes de PDFs para SharePoint")
+@app.get("/")
+def health_check():
+    return {"status": "¡El servidor de Envigado está despierto y listo! ☀️"}
 client = Groq(api_key=api_key)
 
 # 2. Nueva estructura: Ahora esperamos el Base64 en lugar del texto plano
