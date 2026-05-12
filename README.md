@@ -11,15 +11,16 @@
 
 ## 1. Arquitectura del Sistema (Diagrama de Flujo)
 
-El siguiente diagrama detalla la extrapolación del flujo de datos desde el ecosistema cerrado de Microsoft 365 hacia la infraestructura de inferencia externa (Groq) utilizando este *middleware* como puente.
+El siguiente diagrama detalla la orquestación completa. Se destaca cómo el entorno de Microsoft 365 actúa como capa de persistencia y visualización, mientras que el procesamiento cognitivo se delega a una infraestructura externa de alto rendimiento.
 
 ```mermaid
 graph TD
-    subgraph "Capa de Orquestación (Microsoft 365)"
+    subgraph "Capa de Orquestación y Persistencia (Microsoft 365)"
     A[Power Apps: Interfaz y Captura] --> B[Power Automate: Orquestador Central]
+    B --> H[(SharePoint: Registro y Almacenamiento)]
     end
 
-    B -- "Conector HTTP Request" --> C
+    B -- "1. Petición HTTP (PDF + Metadata)" --> C
 
     subgraph "Capa de Integración y Lógica (Middleware en Node.js)"
     C[Endpoint API REST] --> D[Knor: Validación de Esquema JSON]
@@ -29,8 +30,9 @@ graph TD
     subgraph "Capa Cognitiva de Alta Velocidad"
     D --> F[Groq API: Motor de Inferencia]
     E --> F
-    F --> G[Llama 3.3 8B: NLP y Resumen]
+    F --> G[Llama 3.3 8B: Generación de Resumen y Tags]
     end
 
     G -- "Respuesta Estructurada" --> C
-    C -- "HTTP Response (200 OK)" --> B
+    C -- "2. HTTP Response (JSON con resultados)" --> B
+    B -- "3. Actualización de Registro: Resumen y Palabras Clave" --> H
