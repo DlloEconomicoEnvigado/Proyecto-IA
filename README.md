@@ -36,3 +36,19 @@ graph TD
     G -- "Respuesta Estructurada" --> C
     C -- "2. HTTP Response (JSON con resultados)" --> B
     B -- "3. Actualización de Registro: Resumen y Palabras Clave" --> H
+
+## 2. Manual de Usuario (Guía Visual de Operación)
+
+La interfaz de usuario fue diseñada bajo el principio de **abstracción arquitectónica**. El funcionario de la Secretaría de Desarrollo Económico no interactúa con líneas de código, ni percibe el enrutamiento de datos hacia servidores externos; todo el ciclo de vida del documento ocurre dentro del entorno seguro y familiar de Power Apps y Microsoft 365.
+
+### 2.1. Interfaz de Captura y Validación Documental
+El sistema actúa como el primer anillo de seguridad. La interfaz valida en tiempo real la integridad de la carga, restringiendo la extensión de los archivos exclusivamente a formato `.pdf` y garantizando que se procese un único documento por transacción para no saturar la ventana de contexto del modelo de inteligencia artificial.
+
+*(Nota: Cargar la imagen anonimizada en la ruta indicada)*
+![Pantalla de Captura y Validación](docs/img/01-captura-validacion.png)
+
+### 2.3. Visualización de Resultados en Tiempo Real
+Una vez el usuario autorizado envía el acta, el sistema entra en un estado de procesamiento. En cuestión de segundos, la interfaz consulta el registro actualizado en SharePoint y renderiza en pantalla el **Resumen Ejecutivo** y las **Palabras Clave** generadas semánticamente por Llama 3.3, permitiendo al funcionario validar la extracción cognitiva inmediatamente.
+
+*(Nota: Cargar la imagen anonimizada en la ruta indicada)*
+![Visualización de Resultados](docs/img/02-resultados-ia.png)
