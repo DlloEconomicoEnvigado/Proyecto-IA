@@ -37,6 +37,8 @@ graph TD
     C -- "2. HTTP Response (JSON con resultados)" --> B
     B -- "3. Actualización de Registro: Resumen y Palabras Clave" --> H
 
+```
+
 ## 2. Manual de Usuario (Guía Visual de Operación)
 
 La interfaz de usuario fue diseñada bajo el principio de **abstracción arquitectónica**. El funcionario de la Secretaría de Desarrollo Económico no interactúa con líneas de código, ni percibe el enrutamiento de datos hacia servidores externos; todo el ciclo de vida del documento ocurre dentro del entorno seguro y familiar de Power Apps y Microsoft 365.
