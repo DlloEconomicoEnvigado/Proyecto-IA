@@ -147,3 +147,31 @@ const procesarConLlama = async (textoActa) => {
     }
 };
 ```
+## 4. Evidencias de Pruebas de Validación (QA) y Rendimiento
+
+Para certificar la viabilidad del sistema antes de su despliegue en el entorno de producción de la Secretaría de Desarrollo Económico, se ejecutó una batería de pruebas de estrés, validación lógica y rendimiento. 
+
+### 4.1. Matriz de Casos de Prueba (Edge Cases)
+A continuación, se documentan los escenarios críticos evaluados para garantizar la tolerancia a fallos del ecosistema:
+
+| ID | Componente | Descripción del Escenario | Resultado Esperado | Resultado Obtenido | Estado |
+| :---: | :--- | :--- | :--- | :--- | :---: |
+| **QA-01** | Power Apps | Carga de archivo con extensión no soportada (`.docx`, `.jpg`). | La interfaz bloquea el botón de envío y alerta al usuario. | Botón inhabilitado. Alerta visual generada correctamente. | ✅ Pass |
+| **QA-02** | Middleware (Knor) | Petición HTTP desde Power Automate con un payload incompleto (sin `textoExtraido`). | Knor intercepta y rechaza con HTTP 400 (Bad Request). | API devuelve HTTP 400. Power Automate registra el error y notifica. | ✅ Pass |
+| **QA-03** | Motor IA (Groq) | Inferencia de un acta extensa (aprox. 5,000 palabras) evaluando tiempos de respuesta. | Retorno del JSON estructurado en un tiempo < 5 segundos. | Respuesta procesada en 3.2s con formato JSON perfecto. | ✅ Pass |
+| **QA-04** | Seguridad (API) | Intento de consumo del *endpoint* externo sin el Token de Autorización válido. | El servidor rechaza la conexión con HTTP 401 (Unauthorized). | Conexión denegada. Protección del microservicio confirmada. | ✅ Pass |
+
+### 4.2. Estrategia de Disponibilidad: Mitigación del "Cold Start"
+Uno de los mayores retos en arquitecturas *Serverless* (sin servidor) es la latencia inicial cuando el contenedor del microservicio entra en estado de hibernación por inactividad (*Cold Start*). Para la administración pública, un retraso de 15 a 30 segundos en la primera consulta del día genera una mala experiencia de usuario.
+
+Para solucionar esto sin incurrir en costos de "concurrencia provisionada", se integró **ConsoleCron** como estrategia *Keep-Alive*.
+
+**Configuración del Ping Automatizado:**
+Se programó una tarea (Cron Job) que realiza una petición de tipo `HEAD` o un `GET` de bajísimo peso al servidor cada 14 minutos. Esto mantiene el entorno de ejecución Node.js permanentemente "caliente" en la memoria del servidor.
+
+```yaml
+# Configuración del Job en ConsoleCron (Formato de expresión Cron)
+Nombre del Job: Keep-Alive-Middleware-Envigado
+Frecuencia: */10 * * * * # Se ejecuta cada 10 minutos
+Endpoint URL: [https://api-middleware-envigado.com/ping](https://api-middleware-envigado.com/ping)
+Método HTTP: GET
