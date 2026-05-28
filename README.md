@@ -53,6 +53,11 @@ Una vez el usuario autorizado envía el acta, el sistema entra en un estado de p
 
 ![Visualización de Resultados](docs/img/02-resultados-ia.png)
 
+### 2.3. Integración de Power Automate a través de HTTP Reuest
+Esta integración de _Power Platform_ con el _middleware_ externo, permite consolidar la eficiencia en el uso de recursos, al permitir que dicha solicitud sea centralizada a través de una única cuenta _Premiun_ (efecto _funnel_), en vez de agotar créditos con varias cuentas que usen instrumentos nativos para buscar el mismo resultado.
+
+![Visualización de Resultados](docs/img/03-comparación-arquitecturas.png)
+
 ## 3. Fragmentos de Código Clave (Middleware en Node.js)
 
 A continuación, se exponen los componentes críticos desarrollados en el microservicio (alojado y ejecutado externamente) que garantizan la integridad de los datos y el procesamiento cognitivo mediante el modelo fundacional Llama 3.3 (8B). Por motivos de ciberseguridad, **el código ha sido sanitizado** y las credenciales se manejan estrictamente a través de variables de entorno (`process.env`).
