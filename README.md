@@ -58,6 +58,11 @@ Esta integración de _Power Platform_ con el _middleware_ externo, permite conso
 
 ![Visualización de Resultados](docs/img/03-comparación-arquitecturas.png)
 
+### 2.4. Escenarios en el flujo de ejecución de Power Automate
+La velocidad de repuesta en la entraga del resultado final, está asociado a las condiciones en las que se integran la solicitud del flujo (HTTP Request), el motor de inferencia en Groq y el servicio ConsoleCron. Cada solicitud en Power Automate se ejecuta en dos partes consecutivas, la primera envía la solicitud y la segunda recibe el resultado para disponerlo en el repositorio de SharePoint. Los flujos 1 al 4, evidencian el par de corridas (1-2 y 3-4) en los que la primera solicitud se tarda algunos segundos (0:55 y 2:11) como consecuencia del arranque en frío dado que ConsoleCron no estaba manteniendo el motor de inferencia en alerta permanente. Las ejecuciones 5 a 8, evidencian dos pares de corridas en donde las demoras son significativamente mínimas en la primera solicitud (4 segundos ambas) dado que el motor de inferencia ha sido encendido previamente en la corrida anterior. La ejecución 9, vuelve a tener una latencia alta (34 segundos), debido a que, por desuso, el motor de inferencia se ha apagado nuevamente. Finalmente, la ejecución 11, a pesar de estar alejada -en tiempo- de la anterior, se ejecuta en sólo 4 segundos, dado que, para esta corrida, ConsoleCron está manteniendo el motor de inferencia en alerta constante (encendido).
+
+![Visualización de Resultados](docs/img/04-escenarios-flujos.png)
+
 ## 3. Fragmentos de Código Clave (Middleware en Node.js)
 
 A continuación, se exponen los componentes críticos desarrollados en el microservicio (alojado y ejecutado externamente) que garantizan la integridad de los datos y el procesamiento cognitivo mediante el modelo fundacional Llama 3.3 (8B). Por motivos de ciberseguridad, **el código ha sido sanitizado** y las credenciales se manejan estrictamente a través de variables de entorno (`process.env`).
