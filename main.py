@@ -1,7 +1,7 @@
 import os
 import json
 import base64
-import fitz  # Esta es la librería PyMuPDF que acabas de instalar
+import fitz  
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -17,7 +17,6 @@ def health_check():
     return {"status": "¡El servidor de Envigado está despierto y listo! ☀️"}
 client = Groq(api_key=api_key)
 
-# 2. Nueva estructura: Ahora esperamos el Base64 en lugar del texto plano
 class SolicitudDocumento(BaseModel):
     id_registro: str
     nombre_archivo: str
@@ -29,21 +28,17 @@ async def resumir_documento(data: SolicitudDocumento):
         print(f"Recibiendo el archivo: {data.nombre_archivo}...")
 
         # PASO A: Decodificar el PDF desde Base64
-        # A veces Power Automate envía saltos de línea extraños, esto los limpia
         base64_limpio = data.archivo_base64.replace('\n', '').replace('\r', '')
         pdf_bytes = base64.b64decode(base64_limpio)
         
         # PASO B: Leer el PDF en la memoria RAM y extraer el texto
         texto_extraido = ""
-        # Abrimos los bytes como si fueran un archivo PDF
         with fitz.open("pdf", pdf_bytes) as doc:
             for numero_pagina, pagina in enumerate(doc):
                 texto_extraido += pagina.get_text()
                 
         print(f"Texto extraído con éxito. Longitud: {len(texto_extraido)} caracteres.")
 
-        # Seguro de longitud: Limitamos a los primeros ~25,000 caracteres para no exceder 
-        # el límite de tokens de Groq en esta prueba inicial (equivale a unas 8-10 páginas)
         texto_procesar = texto_extraido[:25000] 
 
         # PASO C: Enviar el texto a la IA (Groq)

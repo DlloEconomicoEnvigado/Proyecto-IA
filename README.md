@@ -53,15 +53,15 @@ Una vez el usuario autorizado envía el acta, el sistema entra en un estado de p
 
 ![Visualización de Resultados](docs/img/02-resultados-ia.png)
 
-### 2.3. Integración de Power Automate a través de HTTP Reuest
+### 2.3. Integración de Power Automate a través de HTTP Request
 Esta integración de _Power Platform_ con el _middleware_ externo, permite consolidar la eficiencia en el uso de recursos, al permitir que dicha solicitud sea centralizada a través de una única cuenta _Premiun_ (efecto _funnel_), en vez de agotar créditos con varias cuentas que usen instrumentos nativos para buscar el mismo resultado.
 
-![Visualización de Resultados](docs/img/03-comparación-arquitecturas.png)
+![integración entre Power Automate y HTTP Request](docs/img/03-comparación-arquitecturas.png)
 
 ### 2.4. Escenarios en el flujo de ejecución de Power Automate
-La velocidad de repuesta en la entraga del resultado final, está asociado a las condiciones en las que se integran la solicitud del flujo (HTTP Request), el motor de inferencia en Groq y el servicio ConsoleCron. Cada solicitud en Power Automate se ejecuta en dos partes consecutivas, la primera envía la solicitud y la segunda recibe el resultado para disponerlo en el repositorio de SharePoint. Los flujos 1 al 4, evidencian el par de corridas (1-2 y 3-4) en los que la primera solicitud se tarda algunos segundos (0:55 y 2:11) como consecuencia del arranque en frío dado que ConsoleCron no estaba manteniendo el motor de inferencia en alerta permanente. Las ejecuciones 5 a 8, evidencian dos pares de corridas en donde las demoras son significativamente mínimas en la primera solicitud (4 segundos ambas) dado que el motor de inferencia ha sido encendido previamente en la corrida anterior. La ejecución 9, vuelve a tener una latencia alta (34 segundos), debido a que, por desuso, el motor de inferencia se ha apagado nuevamente. Finalmente, la ejecución 11, a pesar de estar alejada —en tiempo— de la anterior, se ejecuta en sólo 4 segundos, dado que, para esta corrida, ConsoleCron está manteniendo el motor de inferencia en alerta constante (encendido).
+La velocidad de respuesta en la entraga del resultado final, está asociado a las condiciones en las que se integran la solicitud del flujo (HTTP Request), el motor de inferencia en Groq y el servicio ConsoleCron. Cada solicitud en Power Automate se ejecuta en dos partes consecutivas, la primera envía la solicitud y la segunda recibe el resultado para disponerlo en el repositorio de SharePoint. Los flujos 1 al 4, evidencian el par de corridas (1-2 y 3-4) en los que la primera solicitud se tarda algunos segundos (0:55 y 2:11) como consecuencia del arranque en frío dado que ConsoleCron no estaba manteniendo el motor de inferencia en alerta permanente. Las ejecuciones 5 a 8, evidencian dos pares de corridas en donde las demoras son significativamente mínimas en la primera solicitud (4 segundos ambas) dado que el motor de inferencia ha sido encendido previamente en la corrida anterior. La ejecución 9, vuelve a tener una latencia alta (34 segundos), debido a que, por desuso, el motor de inferencia se ha apagado nuevamente. Finalmente, la ejecución 11, a pesar de estar alejada —en tiempo— de la anterior, se ejecuta en sólo 4 segundos, dado que, para esta corrida, ConsoleCron está manteniendo el motor de inferencia en alerta constante (encendido).
 
-![Visualización de Resultados](docs/img/04-escenarios-flujos.png)
+![Escenarios en el flujo](docs/img/04-escenarios-flujos.png)
 
 ## 3. Fragmentos de Código Clave (Middleware en Node.js)
 
@@ -163,7 +163,7 @@ Uno de los mayores retos en arquitecturas *Serverless* (sin servidor) es la late
 Para solucionar esto sin incurrir en costos de "concurrencia provisionada", se integró **ConsoleCron** como estrategia *Keep-Alive*.
 
 **Configuración del Ping Automatizado:**
-Se programó una tarea (Cron Job) que realiza una petición de tipo `HEAD` o un `GET` de bajísimo peso al servidor cada 14 minutos. Esto mantiene el entorno de ejecución Node.js permanentemente "caliente" en la memoria del servidor.
+Se programó una tarea (Cron Job) que realiza una petición de tipo `HEAD` o un `GET` de bajísimo peso al servidor cada 10 minutos. Esto mantiene el entorno de ejecución Node.js permanentemente "caliente" en la memoria del servidor.
 
 ```yaml
 # Configuración del Job en ConsoleCron (Formato de expresión Cron)
@@ -174,9 +174,9 @@ Método HTTP: GET
 ```
 
 ## 4. Visualización y analítica
-El agrupamiento esquematizado de la información favorece la consulta de resultados históricos, especialmente a la hora de asignar filtros de búsqueda que permiten la extracción de datos puntuales, sin importar los lejanos en el tiempo y sin la necesidad de aludir a la memoria humana para llegar a ellos. Este panel de visualización ubica la sección de filtros por categorías especiales y tiempo que favorecen la búsqueda histórica y relevante de actas o metadatos (resúmenes y palabras clave) almacenados en los repositorios. El **recuadro 1** contiene los filtros que permiten la búsqueda histórica de la reunión con su respectiva acta, bien sea por el ID, algún tenxto específico en el resumen o las palabras clave, la dependencia, el equipo de trabajo o el nombre del funcionario responsable de la reunión. El **recuadro 2** muestra el listado de asistencia de los participantes a la reunión muestra el listado de asistencia a la reunión. El **recuadro 3** deja ver el resumen y las palabras clave extraídas generadas por el modelo Llama 3.3 a través del motor de inferencia Groq. El **recuadro 4** permite visualizar el documento original almacenado en el repositorio de datos en SharePoint de Microsoft 365.
+El agrupamiento esquematizado de la información favorece la consulta de resultados históricos, especialmente a la hora de asignar filtros de búsqueda que permiten la extracción de datos puntuales, sin importar que tan antiguos sean y sin la necesidad de aludir a la memoria humana para llegar a ellos. Este panel de visualización ubica la sección de filtros por categorías especiales y tiempo que favorecen la búsqueda histórica y relevante de actas o metadatos (resúmenes y palabras clave) almacenados en los repositorios. El **recuadro 1** contiene los filtros que permiten la búsqueda histórica de la reunión con su respectiva acta, bien sea por el ID, algún texto específico en el resumen o las palabras clave, la dependencia, el equipo de trabajo o el nombre del funcionario responsable de la reunión. El **recuadro 2** muestra el listado de asistencia de los participantes a la reunión muestra el listado de asistencia a la reunión. El **recuadro 3** deja ver el resumen y las palabras clave extraídas generadas por el modelo Llama 3.3 a través del motor de inferencia Groq. El **recuadro 4** permite visualizar el documento original almacenado en el repositorio de datos en SharePoint de Microsoft 365.
 
-![Visualización de Resultados](docs/img/05-visualización-BI.png)
+![Visualización de los datos para la toma de decisiones](docs/img/05-visualización-BI.png)
 
 ## 5. Evidencias de Pruebas de Validación (QA) y Rendimiento
 
